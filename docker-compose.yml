@@ -1,0 +1,29 @@
+version: '3.3'
+
+services:
+  env_file:
+    - .env
+
+  backend:
+    build: .
+    ports:
+      - "8001:8000"
+    volumes:
+      - .:/app
+    depends_on:
+      - db
+
+  db:
+    image: postgres:15
+    restart: always
+    environment:
+      POSTGRES_USER: vanessa
+      POSTGRES_PASSWORD: 123456
+      POSTGRES_DB: supermarket_db
+    ports:
+      - "5433:5432"
+    volumes:
+      - db_data:/var/lib/postgresql/data
+    
+volumes:
+  db_data:

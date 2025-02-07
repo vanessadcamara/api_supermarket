@@ -5,3 +5,4 @@ psycopg2
 alembic
 faker
 python-dotenv
+psycopg2-binary

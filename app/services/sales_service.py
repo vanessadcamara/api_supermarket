@@ -1,3 +1,4 @@
+import datetime
 from typing import Optional, List, Dict, Union
 from sqlalchemy.orm import Session
 from sqlalchemy import func, extract
@@ -10,14 +11,31 @@ from app.models.category import Category
 
 def get_sales_summary(db: Session, start_date: str, end_date: str) -> int:
     logger.info(f"Consultando resumo de vendas de {start_date} a {end_date}")
+
     try:
-        total_sales = db.query(func.count(Sales.id)).filter(Sales.datetime.between(start_date, end_date)).scalar() or 0
+        start_date_dt = datetime.strptime(start_date, "%Y-%m-%d")
+        end_date_dt = datetime.strptime(end_date, "%Y-%m-%d")
+    except ValueError as e:
+        logger.error(f"Erro na formatação das datas: {e}")
+        return 0
+
+    if start_date_dt > end_date_dt:
+        logger.error("Data inicial maior que a data final")
+        return 0
+
+    try:
+        total_sales = (
+            db.query(func.count(Sales.id))
+            .filter(Sales.datetime.between(start_date_dt, end_date_dt))
+            .scalar()
+        ) or 0
+
         logger.info(f"Total de vendas no período: {total_sales}")
         return total_sales
     except Exception as e:
         logger.error(f"Erro ao buscar resumo de vendas: {e}")
         return 0
-
+    
 def get_top_product(db: Session, start_date: str, end_date: str) -> Optional[Dict[str, Union[str, int]]]:
     logger.info(f"Consultando produto mais vendido de {start_date} a {end_date}")
     try:

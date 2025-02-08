@@ -5,7 +5,6 @@ from app.database import Base, engine, SessionLocal
 import uvicorn
 from app.controllers import sales_router
 
-Base.metadata.create_all(bind=engine)
 
 app = FastAPI()
 def get_db():

@@ -3,6 +3,9 @@ from fastapi.responses import JSONResponse
 from sqlalchemy.orm import Session
 from database import engine, SessionLocal
 import uvicorn
+from app.models import Base
+
+Base.metadata.create_all(bind=engine)
 
 app = FastAPI()
 def get_db():
@@ -19,4 +22,4 @@ def read_root():
 
 
 if __name__ == "__main__":
-    uvicorn.run(app, host="127.0.0.1", port=8001)
+    uvicorn.run(app, host="127.0.0.1", port=8000)

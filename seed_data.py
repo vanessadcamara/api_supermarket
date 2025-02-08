@@ -1,8 +1,8 @@
 from faker import Faker
 from sqlalchemy.orm import Session
 from sqlalchemy.exc import IntegrityError, SQLAlchemyError
-from database import SessionLocal, engine
-from app.models import Users, Product, Category, Sales, ProductSales
+from app.database import SessionLocal, engine
+from app.models import Category, Product, Users, Sales, ProductSales
 from datetime import datetime
 import random
 from tqdm import tqdm  # Biblioteca para barra de progresso

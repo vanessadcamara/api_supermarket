@@ -6,3 +6,4 @@ alembic
 faker
 python-dotenv
 psycopg2-binary
+loguru

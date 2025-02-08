@@ -1,9 +1,9 @@
 from fastapi import FastAPI, Depends
 from fastapi.responses import JSONResponse
 from sqlalchemy.orm import Session
-from database import engine, SessionLocal
+from app.database import Base, engine, SessionLocal
 import uvicorn
-from app.models import Base
+from app.controllers import sales_router
 
 Base.metadata.create_all(bind=engine)
 
@@ -15,11 +15,7 @@ def get_db():
     finally:
         db.close()
 
-# Rota raiz
-@app.get("/")
-def read_root():
-    return JSONResponse(content={"message": "Supermarket Backend API is running!"})
-
+app.include_router(sales_router)
 
 if __name__ == "__main__":
     uvicorn.run(app, host="127.0.0.1", port=8000)

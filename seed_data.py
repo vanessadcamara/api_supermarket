@@ -15,7 +15,7 @@ db: Session = SessionLocal()
 
 # Parâmetros de otimização
 BATCH_SIZE = 1000  # Número de registros por inserção
-TOTAL_SALES = 10_000_000  # Total de vendas
+TOTAL_SALES = 50_000_000  # Total de vendas
 
 def seed_categories_and_products():
     """Cria categorias e produtos no banco de dados."""

@@ -7,3 +7,7 @@ faker
 python-dotenv
 psycopg2-binary
 loguru
+pytest
+pytest-asyncio
+httpx
+pytest-cov

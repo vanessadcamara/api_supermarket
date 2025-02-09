@@ -2,6 +2,7 @@ import datetime
 from typing import Optional, List, Dict, Union
 from sqlalchemy.orm import Session
 from sqlalchemy import func, extract
+from sqlalchemy.sql import text
 from app.logger import logger  
 from app.models.sales import Sales
 from app.models.product_sales import ProductSales
@@ -13,20 +14,9 @@ def get_sales_summary(db: Session, start_date: str, end_date: str) -> int:
     logger.info(f"Consultando resumo de vendas de {start_date} a {end_date}")
 
     try:
-        start_date_dt = datetime.strptime(start_date, "%Y-%m-%d")
-        end_date_dt = datetime.strptime(end_date, "%Y-%m-%d")
-    except ValueError as e:
-        logger.error(f"Erro na formatação das datas: {e}")
-        return 0
-
-    if start_date_dt > end_date_dt:
-        logger.error("Data inicial maior que a data final")
-        return 0
-
-    try:
         total_sales = (
             db.query(func.count(Sales.id))
-            .filter(Sales.datetime.between(start_date_dt, end_date_dt))
+            .filter(Sales.datetime.between(start_date, end_date))
             .scalar()
         ) or 0
 
@@ -38,27 +28,34 @@ def get_sales_summary(db: Session, start_date: str, end_date: str) -> int:
     
 def get_top_product(db: Session, start_date: str, end_date: str) -> Optional[Dict[str, Union[str, int]]]:
     logger.info(f"Consultando produto mais vendido de {start_date} a {end_date}")
+
     try:
-        top_product = (
-            db.query(ProductSales.id_product, func.count(ProductSales.id_product).label("total_sold"))
-            .join(Sales, Sales.id == ProductSales.id_sale)
-            .filter(Sales.datetime.between(start_date, end_date))
-            .group_by(ProductSales.id_product)
-            .order_by(func.count(ProductSales.id_product).desc())
-            .limit(1)
-            .first()
-        )
-        if top_product:
-            product = db.query(Product).filter(Product.id == top_product.id_product).first()
-            if product:
-                result = {"top_product": product.description, "total_sold": top_product.total_sold}
-                logger.info(f"Produto mais vendido: {result}")
-                return result
+        result = db.execute(
+            text("""
+                SELECT p.description, COUNT(ps.id_product) AS total_sold
+                FROM product_sales ps
+                JOIN sales s ON s.id = ps.id_sale
+                JOIN product p ON p.id = ps.id_product
+                WHERE s.datetime >= :start_date AND s.datetime <= :end_date
+                GROUP BY p.id, p.description
+                ORDER BY total_sold DESC
+                LIMIT 1
+                 
+            """), {"start_date": start_date, "end_date": end_date}
+        ).fetchone()
+
+        if result:
+            product_description, total_sold = result
+            logger.info(f"Produto mais vendido: {product_description}, {total_sold}")
+            return {"top_product": product_description, "total_sold": total_sold}
+
         logger.info("Nenhum produto encontrado no período")
         return None
+
     except Exception as e:
         logger.error(f"Erro ao buscar produto mais vendido: {e}")
         return None
+    
 
 def get_top_customer(db: Session, start_date: str, end_date: str) -> Optional[Dict[str, Union[str, int]]]:
     logger.info(f"Consultando melhor cliente de {start_date} a {end_date}")

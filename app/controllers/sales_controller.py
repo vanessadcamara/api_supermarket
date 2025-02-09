@@ -3,7 +3,7 @@ from sqlalchemy.orm import Session
 from typing import Dict, Any
 from app.database import SessionLocal
 from app.services.sales_service import (
-    get_sales_summary, get_top_product, get_top_customer,
+    get_sales_summary, get_top_product, get_top_customer, 
     get_revenue_by_category, get_yearly_sales_average
 )
 

@@ -1,18 +1,9 @@
-from fastapi import FastAPI, Depends
-from fastapi.responses import JSONResponse
-from sqlalchemy.orm import Session
-from app.database import Base, engine, SessionLocal
+from fastapi import FastAPI
 import uvicorn
 from app.controllers import sales_router
-
-
+from app.jobs.refresh_materialized_view import start_scheduler
 app = FastAPI()
-def get_db():
-    db = SessionLocal()
-    try:
-        yield db
-    finally:
-        db.close()
+start_scheduler()
 
 app.include_router(sales_router)
 

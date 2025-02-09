@@ -100,17 +100,15 @@ def get_revenue_by_category(db: Session, start_date: str, end_date: str) -> List
         return []
 
 def get_yearly_sales_average(db: Session) -> List[Dict[str, Union[int, int]]]:
-    logger.info("Consultando média de vendas anuais")
+    logger.info("Consultando média de vendas anuais via MATERIALIZED VIEW")
     try:
-        yearly_avg = (
-            db.query(extract("year", Sales.datetime).label("year"), func.count(Sales.id).label("total_sales"))
-            .group_by("year")
-            .order_by("year")
-            .all()
-        )
-        result = [{"year": int(year), "total_sales": sales} for year, sales in yearly_avg]
+        yearly_avg = db.execute(
+            text("SELECT year, total_sales FROM yearly_total_sales ORDER BY year")
+        ).fetchall()
+        result = [{"year": int(year), "avg_sales": total_sales / 12} for year, total_sales in yearly_avg]
         logger.info(f"Média de vendas anuais encontrada: {result}")
         return result
+
     except Exception as e:
         logger.error(f"Erro ao buscar média de vendas anuais: {e}")
         return []

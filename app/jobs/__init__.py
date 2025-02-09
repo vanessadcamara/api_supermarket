@@ -1,0 +1,1 @@
+from .refresh_materialized_view import start_scheduler

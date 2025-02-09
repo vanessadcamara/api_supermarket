@@ -10,7 +10,6 @@ from app.models.product import Product
 from app.models.users import Users
 from app.models.category import Category
 
-#OK
 def get_sales_summary(db: Session, start_date: str, end_date: str) -> int:
     logger.info(f"Consultando resumo de vendas de {start_date} a {end_date}")
 
@@ -27,7 +26,6 @@ def get_sales_summary(db: Session, start_date: str, end_date: str) -> int:
         logger.error(f"Erro ao buscar resumo de vendas: {e}")
         return 0
 
-#MELHORAR 
 def get_top_product(db: Session, start_date: str, end_date: str) -> Optional[Dict[str, Union[str, int]]]:
     logger.info(f"Consultando produto mais vendido de {start_date} a {end_date}")
 
@@ -57,7 +55,6 @@ def get_top_product(db: Session, start_date: str, end_date: str) -> Optional[Dic
         logger.error(f"Erro ao buscar produto mais vendido: {e}")
         return None
      
-#OK
 def get_top_customer(db: Session, start_date: str, end_date: str) -> Optional[Dict[str, Union[str, int]]]:
     logger.info(f"Consultando melhor cliente de {start_date} a {end_date}")
     try:
@@ -81,19 +78,20 @@ def get_top_customer(db: Session, start_date: str, end_date: str) -> Optional[Di
         logger.error(f"Erro ao buscar melhor cliente: {e}")
         return None
 
-#MELHORAR
 def get_revenue_by_category(db: Session, start_date: str, end_date: str) -> List[Dict[str, Union[str, float]]]:
     logger.info(f"Consultando receita por categoria de {start_date} a {end_date}")
+
     try:
-        revenue = (
-            db.query(Category.description, func.sum(Product.price).label("total_revenue"))
-            .join(Product, Category.id == Product.id_category)
-            .join(ProductSales, Product.id == ProductSales.id_product)
-            .join(Sales, Sales.id == ProductSales.id_sale)
-            .filter(Sales.datetime.between(start_date, end_date))
-            .group_by(Category.description)
-            .all()
-        )
+        revenue = db.execute(
+            text("""
+                SELECT category, SUM(total_revenue) AS total_revenue
+                FROM category_revenue_aggregated
+                WHERE sale_date BETWEEN :start_date AND :end_date
+                GROUP BY category
+                ORDER BY total_revenue DESC;
+            """), {"start_date": start_date, "end_date": end_date}
+        ).fetchall()
+
         result = [{"category": cat, "total_revenue": rev} for cat, rev in revenue]
         logger.info(f"Receita por categoria encontrada: {result}")
         return result
@@ -101,7 +99,6 @@ def get_revenue_by_category(db: Session, start_date: str, end_date: str) -> List
         logger.error(f"Erro ao buscar receita por categoria: {e}")
         return []
 
-# OK
 def get_yearly_sales_average(db: Session) -> List[Dict[str, Union[int, int]]]:
     logger.info("Consultando média de vendas anuais via MATERIALIZED VIEW")
     try:

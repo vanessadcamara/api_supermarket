@@ -10,6 +10,7 @@ from app.models.product import Product
 from app.models.users import Users
 from app.models.category import Category
 
+#OK
 def get_sales_summary(db: Session, start_date: str, end_date: str) -> int:
     logger.info(f"Consultando resumo de vendas de {start_date} a {end_date}")
 
@@ -25,29 +26,29 @@ def get_sales_summary(db: Session, start_date: str, end_date: str) -> int:
     except Exception as e:
         logger.error(f"Erro ao buscar resumo de vendas: {e}")
         return 0
-    
+
+#MELHORAR 
 def get_top_product(db: Session, start_date: str, end_date: str) -> Optional[Dict[str, Union[str, int]]]:
     logger.info(f"Consultando produto mais vendido de {start_date} a {end_date}")
 
     try:
         result = db.execute(
             text("""
-                SELECT p.description, COUNT(ps.id_product) AS total_sold
-                FROM product_sales ps
-                JOIN sales s ON s.id = ps.id_sale
-                JOIN product p ON p.id = ps.id_product
-                WHERE s.datetime >= :start_date AND s.datetime <= :end_date
-                GROUP BY p.id, p.description
+                SELECT id_product, description, SUM(total_sold) AS total_sold
+                FROM product_sales_aggregated
+                WHERE sale_date BETWEEN :start_date AND :end_date
+                GROUP BY id_product, description
                 ORDER BY total_sold DESC
-                LIMIT 1
-                 
+                LIMIT 1;
             """), {"start_date": start_date, "end_date": end_date}
         ).fetchone()
 
         if result:
-            product_description, total_sold = result
+            id_product, product_description, total_sold = result
             logger.info(f"Produto mais vendido: {product_description}, {total_sold}")
-            return {"top_product": product_description, "total_sold": total_sold}
+            return {"product_id": id_product, 
+                    "top_product": product_description, 
+                    "total_sold": total_sold}
 
         logger.info("Nenhum produto encontrado no período")
         return None
@@ -55,8 +56,8 @@ def get_top_product(db: Session, start_date: str, end_date: str) -> Optional[Dic
     except Exception as e:
         logger.error(f"Erro ao buscar produto mais vendido: {e}")
         return None
-    
-
+     
+#OK
 def get_top_customer(db: Session, start_date: str, end_date: str) -> Optional[Dict[str, Union[str, int]]]:
     logger.info(f"Consultando melhor cliente de {start_date} a {end_date}")
     try:
@@ -71,7 +72,7 @@ def get_top_customer(db: Session, start_date: str, end_date: str) -> Optional[Di
         if top_customer:
             customer = db.query(Users).filter(Users.id == top_customer.id_user).first()
             if customer:
-                result = {"top_customer": customer.name, "total_purchases": top_customer.total_purchases}
+                result = {"top_customer": customer.name, "cpf":customer.cpf, "total_purchases": top_customer.total_purchases}
                 logger.info(f"Melhor cliente encontrado: {result}")
                 return result
         logger.info("Nenhum cliente encontrado no período")
@@ -80,6 +81,7 @@ def get_top_customer(db: Session, start_date: str, end_date: str) -> Optional[Di
         logger.error(f"Erro ao buscar melhor cliente: {e}")
         return None
 
+#MELHORAR
 def get_revenue_by_category(db: Session, start_date: str, end_date: str) -> List[Dict[str, Union[str, float]]]:
     logger.info(f"Consultando receita por categoria de {start_date} a {end_date}")
     try:
@@ -99,6 +101,7 @@ def get_revenue_by_category(db: Session, start_date: str, end_date: str) -> List
         logger.error(f"Erro ao buscar receita por categoria: {e}")
         return []
 
+# OK
 def get_yearly_sales_average(db: Session) -> List[Dict[str, Union[int, int]]]:
     logger.info("Consultando média de vendas anuais via MATERIALIZED VIEW")
     try:

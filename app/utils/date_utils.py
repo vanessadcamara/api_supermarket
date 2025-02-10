@@ -20,12 +20,12 @@ def is_end_date_lte_today(end_date: str) -> bool:
 def validate_dates(start_date: str, end_date: str):
     if not (is_date_valid(start_date) and is_date_valid(end_date)):
         logger.error(f"Data inválida: {start_date} - {end_date}")
-        raise HTTPException(status_code=400, detail="Formato de data inválido. Use este formato:'YYYY/MM/DD'.")
+        raise HTTPException(status_code=400, detail="Date format is invalid. Use this format: 'YYYY/MM/DD'.")
 
     if not is_start_date_lte_end_date(start_date, end_date):
-        logger.error(f"Data de início maior que a final: {start_date} - {end_date}")
-        raise HTTPException(status_code=400, detail="A data de início deve ser menor ou igual à data final.")
+        logger.error(f"Initial date greater than final date: {start_date} - {end_date}")
+        raise HTTPException(status_code=400, detail="Initial date cannot be greater than the final date.")
 
     if not is_end_date_lte_today(end_date):
-        logger.error(f"Data final maior que a atual: {end_date}")
-        raise HTTPException(status_code=400, detail="A data final não pode ser maior que a data atual.")
+        logger.error(f"End date greater than today: {end_date}")
+        raise HTTPException(status_code=400, detail="The end date cannot be greater than today.")

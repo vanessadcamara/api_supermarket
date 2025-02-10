@@ -64,7 +64,7 @@ def test_get_top_product(db_session):
 
     result = get_top_product(db_session, "2024-01-01", "2024-01-31")
 
-    assert result == {"top_product": "Produto A", "total_sold": 100}
+    assert result == {"top_product": "Product A", "total_sold": 100}
 
 
 def test_get_top_product_no_data(db_session):
@@ -83,13 +83,13 @@ def test_get_top_customer(db_session):
     db_session.query().filter().group_by().order_by().limit().first.return_value = mock_top_customer
 
     mock_user = MagicMock()
-    mock_user.name = "Cliente A"
+    mock_user.name = "Customer A"
 
     db_session.query().filter().first.return_value = mock_user
 
     result = get_top_customer(db_session, "2024-01-01", "2024-01-31")
 
-    assert result == {"top_customer": "Cliente A", "total_purchases": 5}
+    assert result == {"top_customer": "Customer A", "total_purchases": 5}
 
 
 def test_get_top_customer_no_data(db_session):
@@ -102,15 +102,15 @@ def test_get_top_customer_no_data(db_session):
 
 def test_get_revenue_by_category(db_session):
     db_session.query().join().join().join().filter().group_by().all.return_value = [
-        ("Categoria A", 1000.50),
-        ("Categoria B", 500.75),
+        ("Category A", 1000.50),
+        ("Category B", 500.75),
     ]
 
     result = get_revenue_by_category(db_session, "2024-01-01", "2024-01-31")
 
     assert result == [
-        {"category": "Categoria A", "total_revenue": 1000.50},
-        {"category": "Categoria B", "total_revenue": 500.75},
+        {"category": "Category A", "total_revenue": 1000.50},
+        {"category": "Category B", "total_revenue": 500.75},
     ]
 
 

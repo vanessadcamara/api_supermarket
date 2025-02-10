@@ -8,24 +8,20 @@ from app.logger import logger
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    """ Gerencia o ciclo de vida da aplicação """
-
-    logger.info("Iniciando a aplicação...")
+    logger.info("Starting the application...")
 
     # Atualiza a tabela de agregação imediatamente ao iniciar
-    logger.info("Executando a atualização inicial da tabela de agregação...")
+    logger.info("Running initial update of aggregation table...")
     update_product_sales_aggregated()
     update_category_revenue_aggregated()
 
     # Inicia os jobs agendados
     start_scheduler()
     start_aggregated_table_scheduler()
-
-    logger.info("Aplicação iniciada e scheduler rodando.")
+    logger.info("Scheduler started.")
     
     yield  # Aqui a aplicação continua rodando
-
-    logger.info("Finalizando a aplicação...")
+    logger.info("Stopping the application...")
 
 
 app = FastAPI(lifespan=lifespan)

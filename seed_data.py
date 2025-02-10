@@ -28,7 +28,7 @@ def seed_categories_and_products():
     db.commit()
 
 def seed_users():
-    print("Inserindo usuários...")
+    print("Inserting users...")
     """Cria usuários no banco de dados."""
     users = [Users(name=fake.name(), cpf=fake.unique.ssn()) for _ in tqdm(range(1_000_000), desc="Inserindo usuários", unit=" usuários")]
     db.bulk_save_objects(users)
@@ -66,11 +66,11 @@ def seed_sales():
                     pbar.update(BATCH_SIZE)
             
             except IntegrityError as e:
-                print(f"Erro de integridade ignorado: {e}")
+                print(f"Integrity error ignored: {e}")
             except SQLAlchemyError as e:
-                print(f"Erro do SQLAlchemy ignorado: {e}")
+                print(f"SQLAlchemy error ignored: {e}")
             except Exception as e:
-                print(f"Erro inesperado ignorado: {e}")
+                print(f"Unexpected error ignored: {e}")
 
         # Inserir registros restantes
         if products_sales_batch:
@@ -78,9 +78,9 @@ def seed_sales():
                 db.bulk_save_objects(products_sales_batch)
                 db.commit()
             except Exception as e:
-                print(f"Erro inesperado ignorado: {e}")
+                print(f"Unexpected error ignored: {e}")
 if __name__ == "__main__":
-    print("Iniciando seed de dados...")
+    print("Starting data seed...")
     #seed_categories_and_products()
     #seed_users()
     seed_sales()

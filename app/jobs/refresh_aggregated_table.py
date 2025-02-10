@@ -4,9 +4,8 @@ from app.database import SessionLocal
 from app.logger import logger
 
 def update_product_sales_aggregated():
-    """ Atualiza a tabela de agregação de produtos mais vendidos """
-    logger.info("Atualizando a tabela de agregação de vendas...")
-
+    logger.info("Updating the sales aggregation table...")
+    
     db = SessionLocal()
     try:
         db.execute(text("""
@@ -25,15 +24,14 @@ def update_product_sales_aggregated():
             DO UPDATE SET total_sold = EXCLUDED.total_sold;
         """))
         db.commit()
-        logger.info("Tabela de agregação atualizada com sucesso!")
+        logger.info("Aggregation table updated successfully.")
     except Exception as e:
-        logger.error(f"Erro ao atualizar a tabela de agregação: {e}")
+        logger.error(f"Error updating the aggregation table: {e}")
     finally:
         db.close()
 
 def update_category_revenue_aggregated():
-    """ Atualiza a tabela de agregação de receita por categoria """
-    logger.info("Atualizando a tabela de agregação de receita por categoria...")
+    logger.info("Updating the revenue aggregation table by category...")
 
     db = SessionLocal()
     try:
@@ -54,9 +52,9 @@ def update_category_revenue_aggregated():
             DO UPDATE SET total_revenue = EXCLUDED.total_revenue;
         """))
         db.commit()
-        logger.info("Tabela de agregação de receita por categoria atualizada com sucesso!")
+        logger.info("Revenue aggregation table updated successfully.")
     except Exception as e:
-        logger.error(f"Erro ao atualizar a tabela de agregação: {e}")
+        logger.error(f"Error updating the revenue aggregation table: {e}")
     finally:
         db.close()
 

@@ -22,7 +22,7 @@ def get_sales_summary(db: Session, start_date: str, end_date: str) -> int:
         return None
 
 def get_top_product(db: Session, start_date: str, end_date: str) -> Optional[Dict[str, Union[str, int]]]:
-    logger.info(f"Querying total sales from {start_date} to {end_date}")
+    logger.info(f"Querying top product from {start_date} to {end_date}")
     
     try:
         result = db.execute(
@@ -48,7 +48,7 @@ def get_top_product(db: Session, start_date: str, end_date: str) -> Optional[Dic
         return None     
     
 def get_top_customer(db: Session, start_date: str, end_date: str) -> Optional[Dict[str, Union[str, int]]]:
-    logger.info(f"Querying total sales from {start_date} to {end_date}")
+    logger.info(f"Querying top customer from {start_date} to {end_date}")
     try:
         top_customer = (
             db.query(Sales.id_user, func.count(Sales.id_user).label("total_purchases"))
@@ -58,6 +58,7 @@ def get_top_customer(db: Session, start_date: str, end_date: str) -> Optional[Di
             .limit(1)
             .first()
         )
+
         if top_customer:
             customer = db.query(Users).filter(Users.id == top_customer.id_user).first()
             if customer:
@@ -92,7 +93,7 @@ def get_revenue_by_category(db: Session, start_date: str, end_date: str) -> List
         return []
 
 def get_yearly_sales_average(db: Session) -> List[Dict[str, Union[int, int]]]:
-    logger.info("Consultando média de vendas anuais via MATERIALIZED VIEW")
+    logger.info("Querying yearly sales average via MATERIALIZED VIEW")
     try:
         yearly_avg = db.execute(
             text("SELECT year, total_sales FROM yearly_total_sales ORDER BY year")

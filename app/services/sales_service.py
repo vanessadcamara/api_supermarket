@@ -5,16 +5,17 @@ from sqlalchemy.sql import text
 from app.logger import logger  
 from app.models.sales import Sales
 from app.models.users import Users
+from app.utils.date_utils import validate_dates
 
 def get_sales_summary(db: Session, start_date: str, end_date: str) -> int:
     logger.info(f"Querying total sales from {start_date} to {end_date}")
+    validate_dates(start_date, end_date)   
     try:
         total_sales = (
             db.query(func.count(Sales.id))
             .filter(Sales.datetime.between(start_date, end_date))
             .scalar()
-        ) or 0
-
+        ) or None
         logger.info(f"Total sales found: {total_sales}")
         return total_sales
     except Exception as e:
@@ -23,6 +24,7 @@ def get_sales_summary(db: Session, start_date: str, end_date: str) -> int:
 
 def get_top_product(db: Session, start_date: str, end_date: str) -> Optional[Dict[str, Union[str, int]]]:
     logger.info(f"Querying top product from {start_date} to {end_date}")
+    validate_dates(start_date, end_date)   
     
     try:
         result = db.execute(
@@ -49,6 +51,7 @@ def get_top_product(db: Session, start_date: str, end_date: str) -> Optional[Dic
     
 def get_top_customer(db: Session, start_date: str, end_date: str) -> Optional[Dict[str, Union[str, int]]]:
     logger.info(f"Consultando top customer de {start_date} a {end_date}")
+    validate_dates(start_date, end_date)   
 
     try:
         top_customer = db.execute(
@@ -79,6 +82,7 @@ def get_top_customer(db: Session, start_date: str, end_date: str) -> Optional[Di
 
 def get_revenue_by_category(db: Session, start_date: str, end_date: str) -> List[Dict[str, Union[str, float]]]:
     logger.info(f"Querying revenue by category from {start_date} to {end_date}")
+    validate_dates(start_date, end_date)   
 
     try:
         revenue = db.execute(
@@ -100,6 +104,7 @@ def get_revenue_by_category(db: Session, start_date: str, end_date: str) -> List
 
 def get_yearly_sales_average(db: Session) -> List[Dict[str, Union[int, int]]]:
     logger.info("Querying yearly sales average via MATERIALIZED VIEW")
+
     try:
         yearly_avg = db.execute(
             text("SELECT year, total_sales FROM yearly_total_sales ORDER BY year")

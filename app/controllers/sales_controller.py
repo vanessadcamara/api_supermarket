@@ -7,7 +7,6 @@ from app.services.sales_service import (
     get_revenue_by_category, get_yearly_sales_average
 )
 from app.logger import logger  
-from app.utils.date_utils import validate_dates
 router = APIRouter()
 
 def get_db() -> Session:
@@ -19,7 +18,6 @@ def get_db() -> Session:
 
 @router.get("/sales/summary", response_model=Dict[str, int])
 def sales_summary(start_date: str, end_date: str, db: Session = Depends(get_db)) -> Dict[str, int]:
-    validate_dates(start_date, end_date)   
     total_sales = get_sales_summary(db, start_date, end_date)
     if total_sales is None: 
         logger.error("Internal server error while processing request.")
@@ -28,7 +26,6 @@ def sales_summary(start_date: str, end_date: str, db: Session = Depends(get_db))
 
 @router.get("/sales/top-product", response_model=Dict[str, Any])
 def sales_top_product(start_date: str, end_date: str, db: Session = Depends(get_db)) -> Dict[str, Any]:
-    validate_dates(start_date, end_date)   
     try:
         top_product = get_top_product(db, start_date, end_date)
         if top_product is None:
@@ -41,7 +38,6 @@ def sales_top_product(start_date: str, end_date: str, db: Session = Depends(get_
 
 @router.get("/sales/top-customer", response_model=Dict[str, Any])
 def sales_top_customer(start_date: str, end_date: str, db: Session = Depends(get_db)) -> Dict[str, Any]:
-    validate_dates(start_date, end_date)
     try: 
         top_customer = get_top_customer(db, start_date, end_date)
         if top_customer is None: 
@@ -54,7 +50,6 @@ def sales_top_customer(start_date: str, end_date: str, db: Session = Depends(get
 
 @router.get("/sales/revenue-by-category", response_model=Dict[str, Any])
 def sales_revenue_by_category(start_date: str, end_date: str, db: Session = Depends(get_db)) -> Dict[str, Any]:
-    validate_dates(start_date, end_date)
     try: 
         result = get_revenue_by_category(db, start_date, end_date)
         if result is None or len(result) == 0: 

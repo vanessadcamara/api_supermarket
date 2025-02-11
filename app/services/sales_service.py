@@ -48,27 +48,33 @@ def get_top_product(db: Session, start_date: str, end_date: str) -> Optional[Dic
         return None     
     
 def get_top_customer(db: Session, start_date: str, end_date: str) -> Optional[Dict[str, Union[str, int]]]:
-    logger.info(f"Querying top customer from {start_date} to {end_date}")
+    logger.info(f"Consultando top customer de {start_date} a {end_date}")
+
     try:
-        top_customer = (
-            db.query(Sales.id_user, func.count(Sales.id_user).label("total_purchases"))
-            .filter(Sales.datetime.between(start_date, end_date))
-            .group_by(Sales.id_user)
-            .order_by(func.count(Sales.id_user).desc())
-            .limit(1)
-            .first()
-        )
+        top_customer = db.execute(
+            text("""
+                SELECT id_user, SUM(total_purchases) AS total_purchases
+                FROM customer_purchases_aggregated
+                WHERE sale_date BETWEEN :start_date AND :end_date
+                GROUP BY id_user
+                ORDER BY total_purchases DESC
+                LIMIT 1;
+            """), {"start_date": start_date, "end_date": end_date}
+        ).fetchone()
 
         if top_customer:
-            customer = db.query(Users).filter(Users.id == top_customer.id_user).first()
+            id_user, total_purchases = top_customer
+            customer = db.query(Users).filter(Users.id == id_user).first()
+
             if customer:
-                result = {"top_customer": customer.name, "cpf":customer.cpf, "total_purchases": top_customer.total_purchases}
-                logger.info(f"Top customer found: {result}")
+                result = {"top_customer": customer.name, "cpf": customer.cpf, "total_purchases": total_purchases}
+                logger.info(f"Top customer encontrado: {result}")
                 return result
-        logger.info("No customer found in the period.")
+
+        logger.info("Nenhum cliente encontrado no período")
         return None
     except Exception as e:
-        logger.error(f"Internal error while fetching top customer: {e}")
+        logger.error(f"Erro ao buscar top customer: {e}")
         return None
 
 def get_revenue_by_category(db: Session, start_date: str, end_date: str) -> List[Dict[str, Union[str, float]]]:

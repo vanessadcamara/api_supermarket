@@ -58,8 +58,34 @@ def update_category_revenue_aggregated():
     finally:
         db.close()
 
+def update_top_customers_aggregated():
+    logger.info("###")
+
+    db = SessionLocal()
+    try:
+        db.execute(text("""
+            INSERT INTO customer_purchases_aggregated (sale_date, id_user, total_purchases)
+            SELECT 
+                s.datetime::date AS sale_date,
+                s.id_user,
+                COUNT(s.id) AS total_purchases
+            FROM sales s
+            WHERE s.datetime >= now() - interval '7 days'
+            GROUP BY sale_date, s.id_user
+            ON CONFLICT (sale_date, id_user) 
+            DO UPDATE SET total_purchases = EXCLUDED.total_purchases;
+        """))
+        db.commit()
+        logger.info("###")
+    except Exception as e:
+        logger.error(f"###: {e}")
+    finally:
+        db.close()
+
+
 def start_aggregated_table_scheduler():
     scheduler = BackgroundScheduler()
     scheduler.add_job(update_product_sales_aggregated, "interval", hours=1, id="update_product_sales_aggregated")
     scheduler.add_job(update_category_revenue_aggregated, "interval", hours=1, id="update_category_revenue_aggregated") 
+    scheduler.add_job(update_top_customers_aggregated, "interval" , hours=1, id="update_top_customer_aggregated")
     scheduler.start()

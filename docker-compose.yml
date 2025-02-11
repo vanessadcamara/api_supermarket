@@ -1,29 +1,32 @@
 version: '3.3'
 
 services:
-  env_file:
-    - .env
-
   backend:
     build: .
     ports:
-      - "8001:8000"
+      - "8000:8000"
     volumes:
       - .:/app
     depends_on:
       - db
+    env_file:
+      - .env  
 
   db:
     image: postgres:15
-    restart: always
+    container_name: ${CONTAINER_NAME}
     environment:
-      POSTGRES_USER: vanessa
-      POSTGRES_PASSWORD: 123456
-      POSTGRES_DB: supermarket_db
+      POSTGRES_USER: ${DB_USER}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+      POSTGRES_DB: ${DB_NAME}
     ports:
-      - "5433:5432"
+      - "5432:5432"
+    command: -c max_connections=1000
     volumes:
-      - db_data:/var/lib/postgresql/data
-    
+      - supermarket_data:/var/lib/postgresql/data
+    env_file:
+      - .env  
+
+
 volumes:
-  db_data:
+  supermarket_data: 
